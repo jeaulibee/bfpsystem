@@ -4,46 +4,35 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
-    name: Upload Laravel to InfinityFree
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧩 Checkout repository
+      - name: 🧩 Checkout latest code
         uses: actions/checkout@v4
 
-      - name: 📦 Set up PHP
-        uses: shivammathur/setup-php@v2
+      # (Optional) Install dependencies locally before upload
+      # Uncomment if you want Composer dependencies pre-built
+      # - name: 🧰 Install PHP dependencies
+      #   run: |
+      #     composer install --no-dev --optimize-autoloader
+      #     rm -rf node_modules
+      #     npm install
+      #     npm run build || echo "Skipping frontend build"
+
+      - name: 📤 Upload Laravel files to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          php-version: '8.2'
-
-      - name: ⚙️ Install Composer dependencies
-        run: |
-          composer install --no-dev --optimize-autoloader
-
-      - name: 🧹 Clean up unnecessary files
-        run: |
-          rm -rf node_modules
-          rm -rf tests
-          rm -rf storage/logs/*.log
-
-      - name: 🗃️ Build frontend assets (optional)
-        run: |
-          npm install
-          npm run build || echo "Skipping frontend build (no vite config)"
-
-      - name: 📤 Deploy to InfinityFree
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.INFINITY_FTP_SERVER }}
+          server: ftpupload.net
           username: ${{ secrets.INFINITY_FTP_USERNAME }}
           password: ${{ secrets.INFINITY_FTP_PASSWORD }}
+          server-dir: /htdocs/
           protocol: ftp
           port: 21
-          local-dir: ./
-          server-dir: /htdocs/
+          timeout: 60000
           exclude: |
             **/.git*
             **/.github/**
