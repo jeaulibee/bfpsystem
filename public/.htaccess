@@ -1,25 +1,40 @@
-<IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
+name: 🚀 Deploy Laravel App to InfinityFree
 
-    RewriteEngine On
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-    # Handle Authorization Header
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+    steps:
+      - name: 🧩 Checkout latest code
+        uses: actions/checkout@v4
 
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+      # (Optional) Install dependencies locally before upload
+      # Uncomment if you want Composer dependencies pre-built
+      # - name: 🧰 Install PHP dependencies
+      #   run: |
+      #     composer install --no-dev --optimize-autoloader
+      #     rm -rf node_modules
+      #     npm install
+      #     npm run build || echo "Skipping frontend build"
 
-    # Send Requests To Front Controller...
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
-</IfModule>
+      - name: 📤 Upload Laravel files to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: ${{ secrets.INFINITY_FTP_USERNAME }}
+          password: ${{ secrets.INFINITY_FTP_PASSWORD }}
+          server-dir: /htdocs/
+          protocol: ftp
+          port: 21
+          timeout: 60000
+          exclude: |
+            **/.git*
+            **/.github/**
+            node_modules/**
+            vendor/**/.git
