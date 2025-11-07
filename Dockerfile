@@ -36,5 +36,5 @@ RUN sed -i "s/80/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available
 # Expose port
 EXPOSE $PORT
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Start Apache and clear Laravel config/routes at runtime to fix 500 error
+CMD php artisan config:clear && php artisan route:clear && apache2-foreground
