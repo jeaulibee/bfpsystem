@@ -1,43 +1,34 @@
-# Use official PHP 8.2 image with Apache
+# Use the official PHP image with necessary extensions
 FROM php:8.2-apache
 
-# Install system dependencies including PostgreSQL dev headers
-RUN apt-get update && apt-get install -y \
-    git zip unzip libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev libpq-dev
-
-# Enable PHP extensions needed by Laravel
-RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
-
-# Enable Apache mod_rewrite
+# Enable Apache mod_rewrite for Laravel
 RUN a2enmod rewrite
 
-# Suppress Apache ServerName warning
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    git curl libpq-dev unzip libzip-dev nodejs npm \
+    && docker-php-ext-install pdo pdo_pgsql zip
 
-# Copy project files
+# Copy existing application files
 COPY . /var/www/html
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Set Apache document root to Laravel's public folder
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
-
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set correct file permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Build frontend assets with Vite
+RUN npm install && npm run build
 
-# Replace default Apache port with Render port
-ENV PORT 10000
-RUN sed -i "s/80/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port
-EXPOSE $PORT
+# Expose port 10000
+EXPOSE 10000
 
-# Run migrations (with --force for production), clear caches, and start Apache
-CMD php artisan migrate --force && php artisan config:clear && php artisan route:clear && apache2-foreground
+# Start Apache
+CMD ["apache2-foreground"]

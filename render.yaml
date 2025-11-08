@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: bfp-laravel-api
+    env: php
+    plan: free
+    region: singapore
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan key:generate
+      php artisan config:clear
+      php artisan route:clear
+      php artisan view:clear
+      npm install
+      npm run build
+    startCommand: |
+      php artisan serve --host 0.0.0.0 --port 10000
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: bfpdb
+          property: host
+      - key: DB_DATABASE
+        fromDatabase:
+          name: bfpdb
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: bfpdb
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: bfpdb
+          property: password
+
+databases:
+  - name: bfpdb
+    plan: free
