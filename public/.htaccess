@@ -5,8 +5,8 @@
 
     RewriteEngine On
 
-    # Force HTTPS
-    RewriteCond %{HTTPS} !=on
+    # ✅ Force HTTPS behind Render's proxy
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header

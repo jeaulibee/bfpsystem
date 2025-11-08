@@ -21,8 +21,6 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 # 3. Copy project files
 # -----------------------
 COPY . /var/www/html
-
-# Set working directory
 WORKDIR /var/www/html
 
 # -----------------------
