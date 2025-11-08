@@ -2,9 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,14 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (config('app.env') === 'production') {
-            // ✅ Trust all proxies for Render
-            Request::setTrustedProxies(
-                ['0.0.0.0/0'],
-                Request::HEADER_X_FORWARDED_PROTO // ✅ only use PROTO
-            );
-
-            // ✅ Force all routes and assets to use HTTPS
+        // ✅ Fix redirect loop on Render by only forcing HTTPS when needed
+        if (request()->header('X-Forwarded-Proto') === 'https') {
             URL::forceScheme('https');
         }
     }
