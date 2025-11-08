@@ -12,10 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $apiUrl = "https://bfpkoronadalweb.rf.gd/api/citizen/register";
 
+$input = json_decode(file_get_contents('php://input'), true);
 $data = [
-    'name' => $_POST['name'] ?? '',
-    'email' => $_POST['email'] ?? '',
-    'password' => $_POST['password'] ?? ''
+    'name' => $input['name'] ?? '',
+    'email' => $input['email'] ?? '',
+    'password' => $input['password'] ?? ''
 ];
 
 $ch = curl_init($apiUrl);
