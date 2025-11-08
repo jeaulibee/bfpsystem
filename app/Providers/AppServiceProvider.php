@@ -22,13 +22,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (config('app.env') === 'production') {
-            // ✅ Trust Render's HTTPS proxy
+            // ✅ Trust all proxies for Render
             Request::setTrustedProxies(
                 ['0.0.0.0/0'],
-                Request::HEADER_X_FORWARDED_PROTO // fixed constant
+                Request::HEADER_X_FORWARDED_PROTO // ✅ only use PROTO
             );
 
-            // ✅ Force all URLs and forms to use HTTPS
+            // ✅ Force all routes and assets to use HTTPS
             URL::forceScheme('https');
         }
     }

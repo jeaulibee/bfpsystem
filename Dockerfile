@@ -33,10 +33,11 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /et
 # -----------------------
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# -----------------------
 # 6. Install PHP dependencies
-# -----------------------
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader \
+    && php artisan config:clear \
+    && php artisan cache:clear
+
 
 # -----------------------
 # 7. Build frontend assets (Vite)
