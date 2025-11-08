@@ -58,10 +58,10 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 10000
 
 # -----------------------
-# 10. Clear caches and run migrations, then start Apache
+# 10. Clear caches and run migrations safely, then start Apache
 # -----------------------
-CMD php artisan migrate --force && \
-    php artisan config:clear && \
+CMD php artisan config:clear && \
     php artisan route:clear && \
     php artisan view:clear && \
+    php artisan migrate --force --quiet || true && \
     apache2-foreground
